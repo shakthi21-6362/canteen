@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Management System - Live Stream &amp; Test Runner (Group 5)</title>
+  <meta name="description" content="Front-end automated test runner and interactive visual live stream simulator for Library Management System Group 5 test cases TC-01 to TC-08.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header Section -->
+    <header class="header">
+      <div class="header-title-group">
+        <h1>Library Management System &mdash; Test Case Runner</h1>
+        <p>Group 5 Automated Verification &amp; Visual Demonstration Suite (TC-01 to TC-08)</p>
+      </div>
+
+      <div class="header-meta">
+        <span class="badge-tag" title="Client-side deterministic testing">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Standalone Browser Engine
+        </span>
+
+        <div class="defect-toggle-wrapper" title="Simulates a bug where limit check is '3 or fewer' instead of 'fewer than 3', causing TC-04 to fail as per PRD Step 8">
+          <input type="checkbox" id="defect-toggle" />
+          <label for="defect-toggle">Simulate Defect (Allow &le; 3)</label>
+        </div>
+      </div>
+    </header>
+
+    <!-- Suite Summary Cards (FR-11) -->
+    <section class="summary-grid" aria-label="Test Suite Statistics">
+      <div class="summary-card total">
+        <span class="card-label">Total Test Cases</span>
+        <div class="card-value-row">
+          <span class="card-count" id="summary-total">8</span>
+          <span class="card-icon" aria-hidden="true">&#128203;</span>
+        </div>
+      </div>
+
+      <div class="summary-card passed">
+        <span class="card-label">Passed</span>
+        <div class="card-value-row">
+          <span class="card-count" id="summary-passed">0</span>
+          <span class="card-icon" aria-hidden="true">&#10003;</span>
+        </div>
+      </div>
+
+      <div class="summary-card failed">
+        <span class="card-label">Failed</span>
+        <div class="card-value-row">
+          <span class="card-count" id="summary-failed">0</span>
+          <span class="card-icon" aria-hidden="true">&#10005;</span>
+        </div>
+      </div>
+
+      <div class="summary-card pending">
+        <span class="card-label">Not Executed</span>
+        <div class="card-value-row">
+          <span class="card-count" id="summary-pending">8</span>
+          <span class="card-icon" aria-hidden="true">&#9675;</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Toolbar (FR-10, FR-13, FR-14) -->
+    <section class="toolbar" aria-label="Controls Toolbar">
+      <div class="toolbar-group">
+        <button id="btn-run-all" class="btn btn-primary" type="button" title="Execute all 8 tests sequentially">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run All Tests
+        </button>
+
+        <button id="btn-start-stream" class="btn btn-live-stream" type="button" title="Watch full animated live stream demo of test operations">
+          <span class="pulse-dot" style="background:#ffffff;"></span>
+          Watch Live Stream Demo
+        </button>
+
+        <button id="btn-reset-all" class="btn btn-secondary" type="button" title="Clear test results and restore initial state">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset All
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <button id="btn-export-csv" class="btn btn-outline" type="button" title="Export results table as CSV file">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+
+        <button id="btn-print-pdf" class="btn btn-outline" type="button" title="Print-ready view or Save as PDF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / PDF Report
+        </button>
+      </div>
+    </section>
+
+    <!-- View Mode Switcher Tabs -->
+    <nav class="view-tabs" aria-label="View Mode">
+      <button id="tab-stream-view" class="view-tab-btn active" type="button">
+        <span class="pulse-dot"></span>
+        <span>Live Stream Stage Demo</span>
+        <span class="tab-badge">Interactive</span>
+      </button>
+
+      <button id="tab-table-view" class="view-tab-btn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        <span>Execution Matrix Table</span>
+      </button>
+
+      <button id="tab-cards-view" class="view-tab-btn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Separate Test Cards</span>
+      </button>
+    </nav>
+
+    <!-- ====================================================================
+         VIEW 1: LIVE ACTION STREAM VISUAL DEMO STAGE
+         ==================================================================== -->
+    <section class="live-stream-stage" id="live-stream-stage-view" aria-label="Live Visual Demo Stage">
+      <!-- Stage Header Bar -->
+      <div class="stage-top-bar">
+        <div class="stage-top-left">
+          <span class="pulse-dot"></span>
+          <div class="stage-title">Live Action Visual Stream Demo</div>
+          <span id="stream-current-test-badge" class="badge-tag" style="background:#1e293b;color:#38bdf8;border-color:#0284c7;">
+            Ready to Stream
+          </span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap: 8px;">
+          <button id="btn-replay-stream" class="btn btn-secondary btn-sm" type="button" title="Replay current test animation">
+            &#8634; Replay Stream
+          </button>
+          <button id="btn-next-stream" class="btn btn-primary btn-sm" type="button" title="Stream next test">
+            Next Test &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Selector Quick Bar -->
+      <div class="stage-test-nav">
+        <span class="stage-test-nav-label">Select Demo:</span>
+        <button class="stream-test-pill active" data-stream-id="TC-01" type="button">Test 1 (S101 &larr; B01)</button>
+        <button class="stream-test-pill" data-stream-id="TC-02" type="button">Test 2 (Reject Unavailable)</button>
+        <button class="stream-test-pill" data-stream-id="TC-03" type="button">Test 3 (Boundary 2&rarr;3)</button>
+        <button class="stream-test-pill" data-stream-id="TC-04" type="button">Test 4 (Reject 4th Overlimit)</button>
+        <button class="stream-test-pill" data-stream-id="TC-05" type="button">Test 5 (Return B01)</button>
+        <button class="stream-test-pill" data-stream-id="TC-06" type="button">Test 6 (Reject Double Return)</button>
+        <button class="stream-test-pill" data-stream-id="TC-07" type="button">Test 7 (Reissue to S104)</button>
+        <button class="stream-test-pill" data-stream-id="TC-08" type="button">Test 8 (Audit Log Check)</button>
+      </div>
+
+      <!-- Main Visual Arena -->
+      <div class="stage-arena">
+        <!-- Left: Student Actor Card -->
+        <div class="actor-card" id="actor-student-card">
+          <div class="actor-header">
+            <div class="avatar-bubble" id="actor-student-avatar">AJ</div>
+            <div class="actor-info">
+              <h4 id="actor-student-name">Alice Johnson</h4>
+              <span id="actor-student-id">Student ID: S101</span>
+            </div>
+          </div>
+
+          <!-- Quota meter -->
+          <div class="quota-meter-wrapper">
+            <div class="quota-meter-header">
+              <span>Borrowing Quota (Max 3)</span>
+              <span id="actor-quota-text" style="font-weight:700;">0 / 3 Books</span>
+            </div>
+            <div class="quota-slots-row">
+              <div class="quota-slot" id="quota-slot-1"></div>
+              <div class="quota-slot" id="quota-slot-2"></div>
+              <div class="quota-slot" id="quota-slot-3"></div>
+            </div>
+          </div>
+
+          <!-- Inventory list -->
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--text-subtle);text-transform:uppercase;margin-bottom:4px;">
+              Currently Borrowed Books:
+            </div>
+            <div class="inventory-list" id="actor-student-inventory">
+              <span style="color:var(--text-subtle);font-size:0.8rem;" id="actor-inventory-empty-hint">None</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Action & Transfer Beam -->
+        <div class="stage-center-beam">
+          <div class="action-status-banner" id="stream-action-banner">
+            <span>&#9889;</span>
+            <span id="stream-action-banner-text">Select a test to stream action</span>
+          </div>
+
+          <div class="transfer-track">
+            <div class="transfer-particle" id="stream-transfer-particle">
+              &#128214;
+            </div>
+          </div>
+
+          <div style="font-size:0.8rem;color:var(--text-muted);font-weight:500;" id="stream-action-subtext">
+            Deterministic Rule Engine Execution
+          </div>
+        </div>
+
+        <!-- Right: Book Actor Card / Shelf -->
+        <div class="actor-card" id="actor-book-card">
+          <div class="book-cover-mock" id="actor-book-mock">
+            <div>
+              <span class="badge-tag" id="actor-book-tag" style="background:rgba(255,255,255,0.25);color:#ffffff;border:none;">
+                Book B01
+              </span>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:1rem;" id="actor-book-title">Clean Code</div>
+              <div style="font-size:0.75rem;opacity:0.85;" id="actor-book-author">Robert C. Martin</div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span style="font-size:0.8rem;color:var(--text-subtle);">Shelf Status:</span>
+            <span class="status-pill passed" id="actor-book-status-pill">Available</span>
+          </div>
+
+          <div style="font-size:0.8rem;color:var(--text-subtle);">
+            Current Holder: <strong id="actor-book-holder">-</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: Terminal Broadcast Feed -->
+      <div class="stage-bottom-monitor">
+        <div class="monitor-header">
+          <span>Live Execution Stream Logs &amp; Audit Trail</span>
+          <span id="stream-latency-indicator">Latency: 0ms &bull; Zero Server</span>
+        </div>
+        <div class="stream-terminal-feed" id="stream-terminal-feed">
+          <div class="log-entry">
+            <span class="log-time">[00:00.00]</span>
+            <span class="log-tag info">READY</span>
+            <span class="log-text">Visual stream demo initialized. Click "Test 1 (S101 &larr; B01)" to start the live stream!</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 2: Main Test Case Runner Table (FR-07, FR-08, FR-09, FR-15)
+         ==================================================================== -->
+    <section class="table-container" id="matrix-table-view" style="display: none;" aria-label="Test Suite Execution Table">
+      <div class="table-header-bar">
+        <div>
+          <h2>Test Execution Matrix</h2>
+          <p>Click "Run" on any individual row, or "Run All Tests" to execute the entire matrix.</p>
+        </div>
+        <div id="execution-status-indicator" class="badge-tag">
+          Suite Idle
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="test-table" id="test-matrix-table">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 70px;">Test ID</th>
+              <th scope="col">Test Objective</th>
+              <th scope="col">Input &amp; Conditions</th>
+              <th scope="col">Expected Result</th>
+              <th scope="col">Actual Result</th>
+              <th scope="col" style="width: 120px;">Status</th>
+              <th scope="col" class="col-actions" style="width: 130px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="test-table-body">
+            <!-- Dynamically populated by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 3: Separate Individual Demo Cards (Step-by-step Interactive Inspector)
+         ==================================================================== -->
+    <section class="demo-cards-container" id="demo-cards-view" style="display: none;" aria-label="Separate Test Cards Demo">
+      <!-- Dynamically populated by app.js with separate cards for Test 1, Test 2, etc. -->
+    </section>
+
+    <!-- ====================================================================
+         Live Manual Library Simulator (FR-12)
+         ==================================================================== -->
+    <section class="manual-panel" id="manual-panel" aria-label="Interactive Simulator Sandbox">
+      <div class="manual-header" id="manual-header-toggle">
+        <div class="manual-header-title">
+          <h2>Interactive Manual Simulator &amp; Live System State</h2>
+          <p>Test the library business rules by hand and inspect real-time state changes.</p>
+        </div>
+        <span class="btn-toggle-trace" id="manual-collapse-indicator">Collapse &#9650;</span>
+      </div>
+
+      <div class="manual-body" id="manual-body-content">
+        <!-- Interactive Controls -->
+        <div class="manual-controls-card">
+          <form id="manual-action-form" class="manual-form" onsubmit="return false;">
+            <div class="form-group">
+              <label for="select-student">Select Student</label>
+              <select id="select-student" class="form-select">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="select-book">Select Book</label>
+              <select id="select-book" class="form-select">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div class="manual-actions-buttons">
+              <button type="button" id="btn-manual-issue" class="btn btn-primary">
+                Issue Book
+              </button>
+              <button type="button" id="btn-manual-return" class="btn btn-secondary">
+                Return Book
+              </button>
+              <button type="button" id="btn-manual-reset" class="btn btn-outline" title="Reset library state to baseline">
+                Reset State
+              </button>
+            </div>
+          </form>
+
+          <!-- Feedback notification banner -->
+          <div id="manual-feedback-box" class="manual-feedback" role="alert" style="margin-top: 16px;"></div>
+        </div>
+
+        <!-- 3 Reactive State Tables -->
+        <div class="live-tables-grid">
+          <!-- Students Table -->
+          <div class="sub-table-card">
+            <div class="sub-table-header">
+              <h3>Students Roster (Max limit: 3 books)</h3>
+              <span id="students-summary-badge" class="badge-tag">4 Students</span>
+            </div>
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student Name</th>
+                  <th>Issued Count</th>
+                  <th>Held Book IDs</th>
+                </tr>
+              </thead>
+              <tbody id="manual-students-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Books Table -->
+          <div class="sub-table-card">
+            <div class="sub-table-header">
+              <h3>Books Catalog</h3>
+              <span id="books-summary-badge" class="badge-tag">6 Books</span>
+            </div>
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title &amp; Author</th>
+                  <th>Status</th>
+                  <th>Issued To</th>
+                </tr>
+              </thead>
+              <tbody id="manual-books-tbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Transactions Audit Log -->
+          <div class="sub-table-card grid-full-width">
+            <div class="sub-table-header">
+              <h3>Transaction Audit Log (FR-06: Rejected attempts create no record)</h3>
+              <span id="transactions-count-badge" class="badge-tag">0 Records</span>
+            </div>
+            <div style="max-height: 220px; overflow-y: auto;">
+              <table class="sub-table">
+                <thead>
+                  <tr>
+                    <th>Txn ID</th>
+                    <th>Timestamp</th>
+                    <th>Student</th>
+                    <th>Book</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="manual-transactions-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p><strong>Library Management System Test Case Runner</strong> &bull; Group 5 Software Testing Project &bull; Oct 2026</p>
+      <p style="margin-top: 4px;">Deterministic front-end execution &bull; All rules and test cases run locally in browser</p>
+    </footer>
+
+  </div>
+
+  <!-- Script Modules (Vanilla JS, No Build Step) -->
+  <script src="js/library.js"></script>
+  <script src="js/tests.js"></script>
+  <script src="js/runner.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
